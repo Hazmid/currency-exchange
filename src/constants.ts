@@ -3,3 +3,15 @@ export const balance = {
   eur: 150,
   gbp: 10,
 };
+
+export const fromAccount = {
+    dollar: '$',
+    euro: '€',
+    pound: '£',
+}
+
+export const toAccount = {
+    dollar: '$',
+    euro: '€',
+    pound: '£',
+}

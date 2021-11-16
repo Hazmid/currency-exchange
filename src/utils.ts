@@ -28,7 +28,7 @@ export const useStyles = makeStyles(() =>
         color: "#1a9cfc",
     },
     rates: {
-      width: 100,
+      width: "30%",
       fontWeight: "bold",
       color: "#3f51b5",
       display: "flex",
