@@ -1,17 +1,11 @@
-export const balance = {
-  usd: 200,
-  eur: 150,
-  gbp: 10,
+export type BalanceType = {
+  USD?: number;
+  EUR?: number;
+  GBP?: number;
 };
 
-export const fromAccount = {
-    dollar: '$',
-    euro: '€',
-    pound: '£',
-}
-
-export const toAccount = {
-    dollar: '$',
-    euro: '€',
-    pound: '£',
-}
+export const balance: BalanceType = {
+  USD: 200,
+  EUR: 150,
+  GBP: 10,
+};

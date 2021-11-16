@@ -5,30 +5,31 @@ export const useStyles = makeStyles(() =>
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#f7fcff",
+      background: "#7F7FD5",
+      backgroundColor: "linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5)",
       width: "100vw",
       height: "100vh",
       flexDirection: "column",
     },
     card: {
       backgroundColor: "#fff",
-      width: 600,
+      width: 450,
       padding: 50,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       flexDirection: "column",
-      "&.MuiPaper-rounded" : {
+      "&.MuiPaper-rounded": {
         borderRadius: 20,
-      }
+      },
     },
     title: {
       fontSize: 40,
       fontWeight: "bold",
-        color: "#1a9cfc",
+      color: "#fff",
     },
     rates: {
-      width: "30%",
+      width: "50%",
       fontWeight: "bold",
       color: "#3f51b5",
       display: "flex",
@@ -76,15 +77,20 @@ export const useStyles = makeStyles(() =>
       marginLeft: "auto",
     },
     exchangeButton: {
+      "&.MuiButton-root": {
         width: 310,
-      backgroundColor: "#1a9cfc",
-      color: "#fff",
-      padding: 10,
-      borderRadius: 5,
-      border: "none",
-      cursor: "pointer",
-      "&:hover": {
-        backgroundColor: "#3f51b5",
+        backgroundColor: "#1a9cfc",
+        color: "#fff",
+        padding: 10,
+        borderRadius: 5,
+        border: "none",
+        cursor: "pointer",
+        "&:hover": {
+          backgroundColor: "#3f51b5",
+        },
+        "&.Mui-disabled": {
+          backgroundColor: "#ccc",
+        },
       },
     },
   })

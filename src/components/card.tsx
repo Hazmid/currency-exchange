@@ -1,148 +1,142 @@
 import React, { useEffect, useState } from "react";
-import { Card, Grid, Button } from "@mui/material";
+import { Card, Button } from "@mui/material";
 import Input from "./input";
 import Dropdown from "./dropdown";
 import Balance from "./balance";
 import { FaExchangeAlt } from "react-icons/fa";
 import { useStyles } from "../utils";
-import { balance, fromAccount, toAccount } from "../constants";
-import { getLatest } from "../api/api";
+import { balance } from "../constants";
+import { BASE_URL } from "../api/api";
 
 function ExchangeCard() {
   const classes = useStyles();
-  const [currencies, setCurrencies] = useState<any>({
-    dollar: { value: balance.usd, sign: "$" },
-    euro: { value: balance.eur, sign: "€" },
-    pound: { value: balance.gbp, sign: "£" },
-  });
 
-  const [from, setFrom] = useState<string>("");
-  const [to, setTo] = useState<string>("");
-
-  const [fromInput, setFromInput] = useState<number>(0);
-  const [toInput, setToInput] = useState<number>(0);
-
-  const [displayFromBalance, setDisplayFromBalance] = useState<any>({
-    symbol: "",
-    amount: 0,
+  const [currencyOptions, setCurrencyOptions] = useState<any[]>([]);
+  const [fromCurrency, setFromCurrency] = useState<string>("");
+  const [toCurrency, setToCurrency] = useState<string>("");
+  const [exchangeRate, setExchangeRate] = useState<number>();
+  const [amount, setAmount] = useState<number>(1);
+  const [amountInFromCurrency, setAmountInFromCurrency] =
+    useState<Boolean>(true);
+  const [rates, setRates] = useState<any>({ EUR: 1 });
+  const [balanceVal, setBalanceVal] = useState<any>({
+    USD: balance.USD,
+    EUR: balance.EUR,
+    GBP: balance.GBP,
   });
-  const [displayToBalance, setDisplayToBalance] = useState<any>({
-    symbol: "",
-    amount: 0,
-  });
+  const [exceededFrom, setExceededFrom] = useState<boolean>(false);
+  const [exceededTo, setExceededTo] = useState<boolean>(false);
 
-  const [rates, setRates] = useState<any>({
-    euro: 1,
-    pound: 1,
-    dollar: 1,
-  });
+  let toAmount: number, fromAmount: number;
+  if (amountInFromCurrency) {
+    fromAmount = amount;
+    toAmount = amount * exchangeRate!;
+  } else {
+    toAmount = amount;
+    fromAmount = amount / exchangeRate!;
+  }
 
   useEffect(() => {
-    setFrom(currencies.dollar.sign);
-    setTo(currencies.euro.sign);
-    setDisplayFromBalance({
-      symbol: currencies.dollar.sign,
-      amount: currencies.dollar.value,
-    });
-    setDisplayToBalance({
-      symbol: currencies.euro.sign,
-      amount: currencies.euro.value,
-    });
-
-    async function fetchData() {
-      const res = await getLatest();
-      setRates({
-        euro: 1,
-        dollar: res.rates.USD,
-        pound: res.rates.GBP,
-      });
-    }
-    fetchData();
+    fetch(`${BASE_URL}&symbols=USD,GBP&format=1`)
+      .then((res) => res.json())
+      .then((data) => {
+        const firstCurrency = Object.keys(data.rates)[0];
+        setCurrencyOptions([data.base, ...Object.keys(data.rates)]);
+        setFromCurrency(data.base);
+        setToCurrency(firstCurrency);
+        setRates({ ...data.rates, ...rates });
+        setExchangeRate(data.rates[firstCurrency]);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
-  const swap = (obj: any) => {
-    const reversed_obj: any = {};
-    for (let key in obj) {
-      reversed_obj[obj[key]] = key;
+  useEffect(() => {
+    if (fromCurrency != null && toCurrency != null) {
+      setExchangeRate(rates[toCurrency] / rates[fromCurrency]);
     }
-    return reversed_obj;
-  };
+  }, [fromCurrency, toCurrency, rates]);
 
-  const changeAccount = (e: any, mode: string) => {
-    const reversed_obj = swap(fromAccount);
-    Object.keys(reversed_obj).filter((key) => {
-      if (key === e.target.value) {
-        const currency_values: any = Object.values(currencies);
-        const filtered_values: any = Object.values(currencies).filter(
-          (item) => item !== from
-        );
+  function handleFromAmountChange(e: any) {
+    setAmount(e.target.value);
+    setAmountInFromCurrency(true);
+    if (e.target.value > balanceVal[fromCurrency]) {
+      setExceededFrom(true);
+    } else {
+      setExceededFrom(false);
+    }
+  }
 
-        for (let i = 0; i < currency_values.length; i++) {
-          if (currency_values[i].sign === key) {
-            console.log(currency_values[i]);
-            if (mode === "from") {
-              setDisplayFromBalance({
-                symbol: currency_values[i].sign,
-                amount: currency_values[i].value,
-              });
-            }
-          }
-        }
+  function handleToAmountChange(e: any) {
+    setAmount(e.target.value);
+    setAmountInFromCurrency(false);
+    if (e.target.value > balanceVal[fromCurrency]) {
+      setExceededTo(true);
+    } else {
+      setExceededTo(false);
+    }
+  }
 
-        if (mode === "to") {
-          for (let i = 0; i < filtered_values.length; i++) {
-            if (filtered_values[i].sign === key) {
-              console.log(filtered_values[i]);
-
-              setDisplayToBalance({
-                symbol: filtered_values[i].sign,
-                amount: filtered_values[i].value,
-              });
-            }
-          }
-        }
-      }
+  function handleExchange() {
+    setBalanceVal({
+      ...balanceVal,
+      [toCurrency]: balanceVal[toCurrency] + toAmount,
+      [fromCurrency]: balanceVal[fromCurrency] - fromAmount,
     });
-  };
+    setAmount(0);
+  }
 
   return (
     <>
       <Card className={classes.card}>
         <div className={classes.rates}>
-          <span>€{rates.euro}</span>
+          <span>1 {fromCurrency}</span>
           <FaExchangeAlt />
-          <span>£{rates.pound}</span>
+          <span>
+            {exchangeRate?.toFixed(2)} {toCurrency}
+          </span>
         </div>
         <div className={classes.container}>
           <div className={classes.firstContainer}>
             <Dropdown
-              from={from}
-              symbols={Object.values(fromAccount)}
-              setFrom={setFrom}
-              changeAccount={changeAccount}
+              currencyOptions={currencyOptions}
+              selectedCurrency={fromCurrency}
+              onChangeCurrency={(e: any) => setFromCurrency(e.target.value)}
             />
 
             <div className={classes.secondContainer}>
-              <Input fromInput={fromInput} setFromInput={setFromInput} />
-              <Balance balance={displayFromBalance} />
+              <Input
+                onChangeAmount={handleFromAmountChange}
+                amount={fromAmount}
+                exceeded={exceededFrom}
+              />
+              <Balance balance={balanceVal[fromCurrency]} />
             </div>
           </div>
 
           <div className={classes.firstContainer}>
             <Dropdown
-              to={to}
-              symbols={Object.values(toAccount).filter((item) => item !== from)}
-              setTo={setTo}
-              changeAccount={changeAccount}
+              currencyOptions={currencyOptions}
+              selectedCurrency={toCurrency}
+              onChangeCurrency={(e: any) => setToCurrency(e.target.value)}
             />
             <div className={classes.secondContainer}>
-              <Input toInput={toInput} setToInput={setToInput}/>
-              <Balance balance={displayToBalance} />
+              <Input
+                onChangeAmount={handleToAmountChange}
+                amount={toAmount}
+                exceeded={exceededTo}
+              />
+              <Balance balance={balanceVal[toCurrency]} />
             </div>
           </div>
         </div>
 
-        <button className={classes.exchangeButton}>EXCHANGE</button>
+        <Button
+          disabled={exceededFrom || exceededTo ? true : false}
+          className={classes.exchangeButton}
+          onClick={handleExchange}
+        >
+          EXCHANGE
+        </Button>
       </Card>
     </>
   );

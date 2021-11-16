@@ -1,4 +1,3 @@
-import React from "react";
 import ExchangeCard from "./components/card";
 import { useStyles } from "./utils";
 import Title from "./components/Title";
@@ -8,7 +7,7 @@ function App() {
 
   return (
     <div className={classes.body}>
-      <Title />
+      <Title title={"CURRENCY EXCHANGE"} />
       <ExchangeCard />
     </div>
   );

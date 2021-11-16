@@ -1,13 +1,17 @@
 import { useStyles } from "../utils";
 
-function Title() {
-    const classes = useStyles();
+type Props = {
+  title: string;
+};
 
-    return (
-        <>
-         <h1 className={classes.title}>CURRENCY EXCHANGE</h1>  
-        </>
-    )
+function Title(props: Props) {
+  const classes = useStyles();
+
+  return (
+    <>
+      <h1 className={classes.title}>{props.title}</h1>
+    </>
+  );
 }
 
-export default Title
+export default Title;

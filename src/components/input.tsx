@@ -1,12 +1,10 @@
 import NumberFormat from "react-number-format";
 import { useStyles } from "../utils";
-import Typography from "@mui/material/Typography";
 
 type Props = {
-  fromInput?: number;
-  toInput?: number;
-  setFromInput?: (value: number) => void;
-  setToInput?: (value: number) => void;
+  amount: number;
+  onChangeAmount: (e: any) => void;
+  exceeded?: boolean;
 };
 
 function Input(props: Props) {
@@ -14,16 +12,19 @@ function Input(props: Props) {
 
   return (
     <>
-      <p color="error" className={classes.errorMessage}>
+      <p
+        color="error"
+        className={classes.errorMessage}
+        style={{ visibility: props.exceeded ? "visible" : "hidden" }}
+      >
         Exceeded balance
       </p>
       <NumberFormat
-        thousandSeparator
+        allowNegative={false}
+        decimalScale={2}
         className={classes.input}
-        value={props.fromInput || props.toInput}
-        // onChange={(e) => {
-        //     props.setToInput!(Number(e.target.value));
-        // }}
+        value={props.amount}
+        onChange={props.onChangeAmount}
       />
     </>
   );
